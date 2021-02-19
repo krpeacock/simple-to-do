@@ -40,7 +40,7 @@ import simple_to_do from "ic:canisters/simple_to_do";
             width: max-content;
           }
         </style>
-        <form>
+        <form data-testid="todo-form">
           <h1>Submit a todo</h1>
           <formgroup>
               <label for="todo">Add a todo</label>
@@ -60,14 +60,14 @@ import simple_to_do from "ic:canisters/simple_to_do";
 
       // appending the container to the shadow DOM
       shadow.appendChild(editableListContainer);
+      this.getListItems();
     }
 
-    getListItems() {
+    async getListItems() {
       this.isPending = true;
-      simple_to_do.getTodos().then((todos) => {
-        this.setListItems(todos.sort((todo) => todo.id).reverse());
-        this.isPending = false;
-      });
+      const todos = await simple_to_do.getTodos();
+      this.isPending = false;
+      this.setListItems(todos.reverse());
     }
 
     // add items to the list
@@ -82,11 +82,14 @@ import simple_to_do from "ic:canisters/simple_to_do";
         label.setAttribute("for", `todo-${todo.id}`);
         checkbox.setAttribute("type", "checkbox");
         checkbox.setAttribute("id", `todo-${todo.id}`);
+        checkbox.id; //?
+        todo.completed; //?
         checkbox.checked = todo.completed;
+        checkbox.checked; //?
         li.append(label);
         li.append(checkbox);
         this.itemList.appendChild(li);
-
+        this.itemList.innerHTML; //?
         this.handleToggleListeners([checkbox]);
       });
     }
@@ -104,7 +107,6 @@ import simple_to_do from "ic:canisters/simple_to_do";
       this.handleToggleListeners(checkboxes);
       this.form.addEventListener("submit", (e) => {
         e.preventDefault();
-        if (this.isPending) return false;
         const todo = e.target.querySelector("input").value;
         if (!todo) throw new Error("Failed to find todo");
         simple_to_do.addTodo(todo).then((result) => {
@@ -117,23 +119,6 @@ import simple_to_do from "ic:canisters/simple_to_do";
           this.getListItems();
         });
       });
-    }
-
-    // gathering data from element attributes
-    get title() {
-      return this.getAttribute("title") || "";
-    }
-
-    get items() {
-      const items = [];
-
-      [...this.attributes].forEach((attr) => {
-        if (attr.name.includes("list-item")) {
-          items.push(JSON.parse(attr.value));
-        }
-      });
-
-      return items;
     }
 
     handleToggleListeners(arrayOfElements) {
