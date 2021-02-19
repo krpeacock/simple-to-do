@@ -48,7 +48,7 @@ function generateWebpackConfigForCanister(name, info) {
       minimizer: [new TerserPlugin()],
     },
     resolve: {
-      extensions: [".js", ".jsx", ".ts", ".tsx"],
+      extensions: [".js"],
       modules: [
         path.join(__dirname, "src"),
         path.join(__dirname, "node_modules"),
@@ -71,22 +71,6 @@ function generateWebpackConfigForCanister(name, info) {
     //    { test: /\.css$/, use: ['style-loader','css-loader'] }
     //  ]
     // },
-    module: {
-      rules: [
-        {
-          test: /\.(t|j)sx?$/,
-          exclude: [path.join(__dirname, "node_modules")],
-          use: [
-            {
-              loader: "babel-loader",
-              options: {
-                envName: "client",
-              },
-            },
-          ],
-        },
-      ],
-    },
     plugins: [],
   };
 }

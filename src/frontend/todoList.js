@@ -1,22 +1,18 @@
 "use strict";
 import simple_to_do from "ic:canisters/simple_to_do";
 
+// Thanks to Mozilla's web component examples for reference
+// https://github.com/mdn/web-components-examples
 (function () {
   class TodoList extends HTMLElement {
     constructor() {
       // establish prototype chain
       super();
 
-      // attaches shadow tree and returns shadow root reference
-      // https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow
       const shadow = this.attachShadow({ mode: "open" });
 
       // creating a container for the editable-list component
       const editableListContainer = document.createElement("div");
-
-      // get attribute values from getters
-      const listItems = this.items;
-      this.isPending = false;
 
       // adding a class to our container for the sake of clarity
       editableListContainer.classList.add("editable-list");
@@ -48,7 +44,7 @@ import simple_to_do from "ic:canisters/simple_to_do";
           </formgroup>
           <button type="submit">submit</button>
         </form>
-        <ul class="item-list"></ul>
+        <ul class="item-list" data-testid="list-container"></ul>
         <hr />
         <button id="clear-todos" type="reset">Clear Completed Todos</button>
       `;
@@ -64,9 +60,7 @@ import simple_to_do from "ic:canisters/simple_to_do";
     }
 
     async getListItems() {
-      this.isPending = true;
       const todos = await simple_to_do.getTodos();
-      this.isPending = false;
       this.setListItems(todos.reverse());
     }
 
@@ -75,22 +69,16 @@ import simple_to_do from "ic:canisters/simple_to_do";
       this.itemList.innerHTML = "";
       items.forEach((todo) => {
         const li = document.createElement("li");
-        const label = document.createElement("label");
-        const checkbox = document.createElement("input");
 
-        label.textContent = todo.description;
-        label.setAttribute("for", `todo-${todo.id}`);
-        checkbox.setAttribute("type", "checkbox");
-        checkbox.setAttribute("id", `todo-${todo.id}`);
-        checkbox.id; //?
-        todo.completed; //?
-        checkbox.checked = todo.completed;
-        checkbox.checked; //?
-        li.append(label);
-        li.append(checkbox);
+        li.innerHTML = `
+          <label for="todo-${todo.id}">${todo.description}</label>
+          <input type="checkbox" id="todo-${todo.id}" ${
+          todo.completed && "checked"
+        } />
+        `;
+
         this.itemList.appendChild(li);
-        this.itemList.innerHTML; //?
-        this.handleToggleListeners([checkbox]);
+        this.handleToggleListeners([li.querySelector("input")]);
       });
     }
 

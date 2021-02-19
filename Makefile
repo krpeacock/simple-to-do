@@ -5,17 +5,21 @@ all: build
 .SILENT: build
 build:
 	dfx canister create simple_to_do
+	dfx canister create simple_to_do_assets
 	dfx build
 
 .PHONY: install
 .SILENT: install
 install: build
+	npm install
 	dfx canister install simple_to_do
+	dfx canister install simple_to_do_assets
 
 .PHONY: upgrade
 .SILENT: upgrade
 upgrade: build
 	dfx canister install simple_to_do --mode=upgrade
+	dfx canister install simple_to_assets --mode=upgrade
 
 .PHONY: test
 .SILENT: test
@@ -42,6 +46,8 @@ test: install
 		| grep '(2) Build the project ✔' && echo 'PASS'
 	dfx canister call simple_to_do showTodos \
 		| grep '(3) Deploy the project ✔' && echo 'PASS'
+    # run npm tests
+	npm run test
 
 .PHONY: clean
 .SILENT: clean

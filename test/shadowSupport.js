@@ -1,3 +1,4 @@
+// Unstable package for shadow-dom testing [testing-library__dom^7.29.4-beta.1]
 HTMLDocument.prototype.querySelectorAllWithShadowDOM = function (query) {
   const isNotCustomElementParent = true;
   const children = [...(this.children || [])].filter(

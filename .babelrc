@@ -1,29 +1,15 @@
 {
-  "presets": ["@babel/preset-typescript", "@babel/preset-env"],
-  "plugins": [
-    [
-      "@babel/plugin-transform-runtime",
-      {
-        "regenerator": true
-      }
-    ]
-  ],
   "env": {
     "test": {
-      "presets": [
+      "presets": ["@babel/preset-env"],
+      "plugins": [
         [
-          "@babel/preset-env",
+          "@babel/plugin-transform-runtime",
           {
-            "useBuiltIns": "usage",
-            "modules": "commonjs",
-            "corejs": 3,
-            "targets": {
-              "node": "current"
-            }
+            "regenerator": true
           }
         ]
-      ],
-      "plugins": ["@babel/plugin-transform-modules-commonjs"]
+      ]
     }
   }
 }

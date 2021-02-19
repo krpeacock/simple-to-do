@@ -1,23 +1,12 @@
 // import { waitFor, screen } from "@testing-library/dom";
 import "@testing-library/jest-dom/extend-expect";
-global.TextEncoder = require("util").TextEncoder;
-import fetch from "isomorphic-fetch";
 import {
   queryByAttribute,
   queryByTestId,
   getByText,
   queryByText,
   getByTestId,
-  queryByTitle,
 } from "./dom";
-window.crypto = require("@trust/webcrypto");
-const agent = require("@dfinity/agent");
-const {
-  AnonymousIdentity,
-  HttpAgent,
-  makeExpiryTransform,
-  makeNonceTransform,
-} = agent;
 import { screen, waitFor } from "./shadowSupport";
 
 let mockTodos = [];
@@ -38,9 +27,12 @@ let mockMethods = {
       resolve(mockTodos);
     });
   }),
-  clearCompleted: jest.fn(
-    () => (mockTodos = mockTodos.filter((todo) => !todo.checked))
-  ),
+  clearCompleted: jest.fn(() => {
+    return new Promise((resolve) => {
+      mockTodos = mockTodos.filter((todo) => !todo.checked);
+      resolve();
+    });
+  }),
   completeTodo: jest.fn((num) => {
     return new Promise((resolve) => {
       const foundTodo = mockTodos.find((todo) => todo.id === num);
@@ -53,23 +45,6 @@ let mockMethods = {
 jest.mock("ic:canisters/simple_to_do", () => {
   return mockMethods;
 });
-
-function PolyfillAgent({ log = console } = {}) {
-  const agentOptions = {
-    host: "http://localhost:8000",
-    identity: new AnonymousIdentity(),
-  };
-  const agent = new HttpAgent(agentOptions);
-  agent.addTransform(makeNonceTransform());
-  agent.addTransform(makeExpiryTransform(5 * 60 * 1000));
-  return agent;
-}
-
-const ic = {
-  ...window.ic,
-  agent: PolyfillAgent(),
-};
-window.ic = ic;
 
 require("../src/frontend/todoList.js");
 function exampleDOM() {
@@ -117,4 +92,21 @@ test("Complete a Todo", async () => {
   expect(mockMethods.completeTodo).toBeCalledTimes(1);
 
   waitFor(() => expect(checkbox.checked).toBe(true));
+});
+
+test("Clear completed todos", async () => {
+  mockTodos = [{ id: 5, description: "todo to complete", completed: false }];
+  const container = exampleDOM();
+  const todo = await waitFor(() => getByText(container, "todo to complete"));
+  const checkbox = todo.parentElement.querySelector("#todo-5");
+  checkbox.click();
+  expect(mockMethods.completeTodo).toBeCalledTimes(1);
+
+  waitFor(() => expect(checkbox.checked).toBe(true));
+
+  const clearButton = queryByText(container, "Clear Completed Todos");
+  clearButton.click();
+
+  const list = getByTestId(container, "list-container");
+  waitFor(() => expect(list.children.length).toBe(0));
 });
