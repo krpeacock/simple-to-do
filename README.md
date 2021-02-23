@@ -1,6 +1,6 @@
 # Simple To-Do Fullstack
 
-![Compatibility](https://img.shields.io/badge/compatibility-0.6.23-blue)
+![Compatibility](https://img.shields.io/badge/compatibility-0.6.24-blue)
 [![Build Status](https://github.com/dfinity/examples/workflows/motoko-simple-to-do-example/badge.svg)](https://github.com/dfinity/examples/actions?query=workflow%3Amotoko-simple-to-do-example)
 
 This example illustrates how to create a simple fullstack to-do checklist application.
@@ -108,5 +108,5 @@ Additionally, you can run the UI by visiting http://localhost:8000?canisterId=[y
 You can find the canister id by running the command
 
 ```text
-fx canister id simple_to_do_assets
+dfx canister id simple_to_do_assets
 ```
