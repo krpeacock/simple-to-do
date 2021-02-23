@@ -1,9 +1,9 @@
-# Simple To-Do
+# Simple To-Do Fullstack
 
 ![Compatibility](https://img.shields.io/badge/compatibility-0.6.23-blue)
 [![Build Status](https://github.com/dfinity/examples/workflows/motoko-simple-to-do-example/badge.svg)](https://github.com/dfinity/examples/actions?query=workflow%3Amotoko-simple-to-do-example)
 
-This example illustrates how to create a simple to-do checklist application.
+This example illustrates how to create a simple fullstack to-do checklist application.
 
 ## Introduction
 
@@ -38,10 +38,11 @@ Verify the following before running this demo:
 
 1. Open a new terminal window.
 
-1. Reserve an identifier for your canister.
+1. Reserve an identifier for your canisters.
 
    ```text
    dfx canister create simple_to_do
+   dfx canister create simple_to_do_assets
    ```
 
 1. Build your canister.
@@ -53,7 +54,7 @@ Verify the following before running this demo:
 1. Deploy your canister.
 
    ```text
-   dfx canister install simple_to_do
+   dfx deploy
    ```
 
 1. Create a to-do checklist by invoking the `addTodo` method.
@@ -101,3 +102,11 @@ Verify the following before running this demo:
    (2) Build the project
    (3) Deploy the project")
    ```
+
+Additionally, you can run the UI by visiting http://localhost:8000?canisterId=[your_canister_id]
+
+You can find the canister id by running the command
+
+```text
+fx canister id simple_to_do_assets
+```
