@@ -66,4 +66,21 @@ describe("Integration tests", () => {
     });
     expect(isChecked).toBe(true);
   });
+  it("should clear completed todos", async () => {
+    await page.evaluate(() => {
+      const list = document.querySelector("todo-list");
+      const clearButton = list.shadowRoot.querySelector(`button[type="reset"]`);
+      clearButton.click();
+    });
+
+    await page.waitForTimeout(4000);
+
+    const remainingTodos = await page.evaluate(() => {
+      const list = document.querySelector("todo-list");
+      const items = list?.shadowRoot?.querySelectorAll("li");
+      return new Promise((resolve) => resolve(items.length));
+    });
+
+    expect(remainingTodos).toBe(0);
+  });
 });
