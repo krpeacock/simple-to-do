@@ -108,5 +108,5 @@ Additionally, you can run the UI by visiting http://localhost:8000?canisterId=[y
 You can find the canister id by running the command
 
 ```text
-fx canister id simple_to_do_assets
+dfx canister id simple_to_do_assets
 ```
