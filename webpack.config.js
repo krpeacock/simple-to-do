@@ -1,9 +1,20 @@
 const path = require("path");
+const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const CompressionPlugin = require("compression-webpack-plugin");
 const dfxJson = require("./dfx.json");
+require("dotenv").config();
+
+let localCanister;
+
+try {
+  localCanister = require("./.dfx/local/canister_ids.json").simple_to_do.local;
+} catch {}
 
 // List of all aliases for canisters. This creates the module alias for
-// the `import ... from "ic:canisters/xyz"` where xyz is the name of a
+// the `import ... from "@dfinity/ic/canisters/xyz"` where xyz is the name of a
 // canister.
 const aliases = Object.entries(dfxJson.canisters).reduce(
   (acc, [name, _value]) => {
@@ -19,8 +30,7 @@ const aliases = Object.entries(dfxJson.canisters).reduce(
 
     return {
       ...acc,
-      ["ic:canisters/" + name]: path.join(outputRoot, name + ".js"),
-      ["ic:idl/" + name]: path.join(outputRoot, name + ".did.js"),
+      ["dfx-generated/" + name]: path.join(outputRoot, name + ".js"),
     };
   },
   {}
@@ -30,34 +40,40 @@ const aliases = Object.entries(dfxJson.canisters).reduce(
  * Generate a webpack configuration for a canister.
  */
 function generateWebpackConfigForCanister(name, info) {
-  if (typeof info.frontend !== "object") {
-    return;
-  }
+  const isProduction = process.env.NODE_ENV === "production";
+  const devtool = isProduction ? undefined : "source-map";
+
+  process.env.CANISTER_ID = process.env.CANISTER_ID || localCanister;
 
   return {
-    mode: "production",
+    mode: isProduction ? "production" : "development",
     entry: {
-      index: path.join(__dirname, info.frontend.entrypoint),
+      index: path.join(__dirname, "src", "frontend", "index"),
     },
-    node: {
-      fs: "empty",
-    },
-    devtool: "source-map",
+    name,
+    devtool,
     optimization: {
-      minimize: true,
+      minimize: isProduction,
       minimizer: [new TerserPlugin()],
     },
     resolve: {
-      extensions: [".js"],
-      modules: [
-        path.join(__dirname, "src"),
-        path.join(__dirname, "node_modules"),
-      ],
       alias: aliases,
+      extensions: [".js", ".ts", ".jsx", ".tsx"],
+      fallback: {
+        buffer: require.resolve("buffer/"),
+        // events: require.resolve("events/"),
+        // stream: require.resolve("stream-browserify/"),
+      },
     },
     output: {
       filename: "[name].js",
-      path: path.join(__dirname, "dist", name),
+      path: path.join(__dirname, "dist"),
+    },
+    devServer: {
+      port: 8080,
+      proxy: {
+        "/api": "http://localhost:8000",
+      },
     },
 
     // Depending in the language or framework you are using for
@@ -65,13 +81,37 @@ function generateWebpackConfigForCanister(name, info) {
     // webpack configuration. For example, if you are using React
     // modules and CSS as described in the "Adding a stylesheet"
     // tutorial, uncomment the following lines:
-    // module: {
-    //  rules: [
-    //    { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
-    //    { test: /\.css$/, use: ['style-loader','css-loader'] }
-    //  ]
-    // },
-    plugins: [],
+    module: {
+      rules: [{ test: /\.(ts|tsx)$/, loader: "ts-loader" }],
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: path.join(
+          __dirname,
+          "src",
+          "frontend",
+          "assets",
+          "index.html"
+        ),
+        filename: "index.html",
+        chunks: ["index"],
+      }),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.join(__dirname, "src", "frontend", "assets"),
+            to: path.join(__dirname, "dist"),
+          },
+        ],
+      }),
+      new webpack.ProvidePlugin({
+        Buffer: [require.resolve("buffer/"), "Buffer"],
+      }),
+      new webpack.EnvironmentPlugin(["CANISTER_ID"]),
+      new CompressionPlugin({
+        test: /\.js(\?.*)?$/i,
+      }),
+    ],
   };
 }
 

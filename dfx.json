@@ -9,7 +9,7 @@
       "frontend": {
         "entrypoint": "src/frontend/index.js"
       },
-      "source": ["dist/simple_to_do_assets/"],
+      "source": ["dist"],
       "type": "assets"
     }
   },
@@ -18,7 +18,7 @@
       "packtool": ""
     }
   },
-  "dfx": "0.6.23",
+  "dfx": "0.7.0-beta.4",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",
