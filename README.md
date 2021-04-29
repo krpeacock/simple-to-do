@@ -5,6 +5,8 @@
 
 This example illustrates how to create a simple fullstack to-do checklist application.
 
+If you're looking to use http canisters, check out the version on [this branch](https://github.com/krpeacock/simple-to-do/tree/http-canister)!
+
 ## Introduction
 
 The application is built from the following Motoko source code files:
