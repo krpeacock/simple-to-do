@@ -1,6 +1,5 @@
 "use strict";
-import simple_to_do from "ic:canisters/simple_to_do";
-import register from "./register";
+import { todo_actor } from "./actor";
 
 // Thanks to Mozilla's web component examples for reference
 // https://github.com/mdn/web-components-examples
@@ -61,7 +60,7 @@ export class TodoList extends HTMLElement {
   }
 
   async getListItems() {
-    const todos = await simple_to_do.getTodos();
+    const todos = await todo_actor.getTodos();
     this.setListItems(todos.reverse());
   }
 
@@ -98,13 +97,13 @@ export class TodoList extends HTMLElement {
       e.preventDefault();
       const todo = e.target.querySelector("input").value;
       if (!todo) throw new Error("Failed to find todo");
-      simple_to_do.addTodo(todo).then((result) => {
+      todo_actor.addTodo(todo).then((result) => {
         this.getListItems();
       });
       return false;
     });
     clearButton.addEventListener("click", () => {
-      simple_to_do.clearCompleted().then(() => {
+      todo_actor.clearCompleted().then(() => {
         this.getListItems();
       });
     });
@@ -120,7 +119,7 @@ export class TodoList extends HTMLElement {
     e.preventDefault();
     const target = e.target;
     if (!target.getAttribute("checked")) {
-      await simple_to_do.completeTodo(Number(target.id.split("todo-")[1]));
+      await todo_actor.completeTodo(Number(target.id.split("todo-")[1]));
       this.getListItems();
     }
   }
